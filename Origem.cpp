@@ -60,7 +60,7 @@ NODE* RemoveNode(NODE* rmv) {
 void DestroyGrafo(GRAFO* g) {
 	delete[] g->p;
 	for(int i = 0; i < g->v; i++){
-		for (NODE* a = g->n[i]; a != nullptr; a = a->prox) {
+		for (NODE* a = g->n[i]; a != nullptr; a = g->n[i]->prox) {
 			g->n[i] = RemoveNode(a);
 		}
 	}
