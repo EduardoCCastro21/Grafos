@@ -105,6 +105,8 @@ int main(int argc, char **argv) {
 			std::cin >> idx1 >> idx2;
 			IsReachable(*g, idx1-1, idx2-1);
 		}
+		DestroyGrafo(g);
 	}
+
 	return 0;
 }
