@@ -51,17 +51,24 @@ void GrafoInsertLink(GRAFO* g, int v, int w) {
 	g->a++;
 }
 
+/*
+* Função que remove um nó da lista ligada;
+*/
 NODE* RemoveNode(NODE* rmv) {
 	NODE* aux = rmv->prox;
 	delete rmv;
 	return aux;
 }
 
+/*
+* Função para desalocar o espaço de memória do grafo
+*/
 void DestroyGrafo(GRAFO* g) {
 	delete[] g->p;
 	for(int i = 0; i < g->v; i++){
-		for (NODE* a = g->n[i]; a != nullptr; a = g->n[i]->prox) {
+		for (NODE* a = g->n[i]; a != nullptr;) {
 			g->n[i] = RemoveNode(a);
+			a = g->n[i];
 		}
 	}
 	delete[] g->n;
@@ -73,13 +80,13 @@ int dist(points a1, points a2) {
 	return floor(d);
 }
 
-void IsReachable(GRAFO &g, int idx1, int idx2) {
-	int d = dist(g.p[idx1], g.p[idx2]);
-	if (d > g.p[idx1].r)
+void IsReachable(GRAFO *g, int idx1, int idx2) {
+	int d = dist(g->p[idx1], g->p[idx2]);
+	if (d > g->p[idx1].r)
 		std::cout << "output: " << -1 << std::endl;
 	else {
 		std::cout << "output: " << d << std::endl;
-		GrafoInsertLink(&g, idx1, idx2);
+		GrafoInsertLink(g, idx1, idx2);
 	}
 }
 
@@ -103,7 +110,7 @@ int main(int argc, char **argv) {
 		std::cin >> c;
 		for (int i = 0; i < c; i++) {
 			std::cin >> idx1 >> idx2;
-			IsReachable(*g, idx1-1, idx2-1);
+			IsReachable(g, idx1-1, idx2-1);
 		}
 		DestroyGrafo(g);
 	}
