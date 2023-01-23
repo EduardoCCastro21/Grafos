@@ -43,37 +43,79 @@ NODE* NEWnode(int v, int d, NODE* prox) {
 }
 
 /*
-* Procedimento de inserção de arestas
+* Procedimento que remove um nó da lista ligada;
+*/
+void RemoveNode(GRAFO* g, int v, int w) {
+	NODE** rmv = &g->n[v];
+	while (*rmv != nullptr && (*rmv)->num != w) {
+		rmv = &(*rmv)->prox;
+	}
+	if (*rmv != nullptr) {
+		NODE* aux = (*rmv);
+		*rmv = aux->prox;
+		delete aux;
+	}
+	g->a--;
+}
+
+/*
+* Procedimento de inserção de aresta
 */
 void GrafoInsertLink(GRAFO* g, int v, int w, int d) {
 	for (NODE* a = g->n[v]; a != nullptr; a = a->prox)
-		if (a->num == v) return;
+		if (a->num == w) return;
 	g->n[v] = NEWnode(w, d, g->n[v]);
 	g->a++;
 }
 
 /*
-* Função que remove um nó da lista ligada;
+* Procedimento de inserção de aresta bidirecionalmente
 */
-NODE* RemoveNode(NODE* rmv) {
-	NODE* aux = rmv->prox;
-	delete rmv;
-	return aux;
+void GrafoBiLink(GRAFO* g, int v, int w, int d) {
+	GrafoInsertLink(g, v, w, d);
+	GrafoInsertLink(g, w, v, d);
 }
 
 /*
-* Função para desalocar o espaço de memória do grafo
+* Procedimento de remoção de aresta
+*/
+void GrafoRemoveLink(GRAFO* g, int v, int w) {
+	RemoveNode(g, v, w);
+	RemoveNode(g, w, v);
+}
+
+/*
+* Procedimento para desalocar o espaço de memória do grafo
 */
 void DestroyGrafo(GRAFO* g) {
-	delete[] g->p;
+	NODE* aux;
 	for(int i = 0; i < g->v; i++){
-		for (NODE* a = g->n[i]; a != nullptr;) {
-			g->n[i] = RemoveNode(a);
-			a = g->n[i];
+		while (g->n[i] != nullptr) {
+			aux = g->n[i];
+			g->n[i] = aux->prox;
+			delete aux;
 		}
 	}
 	delete[] g->n;
+	delete[] g->p;
 	delete g;
+}
+
+void GrafoShow(GRAFO* g) {
+	for (int i = 0; i < g->v; i++) {
+		std::cout << i << ": ";
+		for (NODE* a = g->n[i]; a != nullptr; a = a->prox) {
+			std::cout << a->num << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+int GrafoOutDeg(GRAFO* g, int v) {
+	int o = 0;
+	for (NODE* a = g->n[v]; a != nullptr; a = a->prox)
+		o++;
+	return o;
 }
 
 int dist(points a1, points a2) {
