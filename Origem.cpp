@@ -5,7 +5,7 @@ struct points { int x; int y; int r; };
 
 typedef struct Node {
 	int num; //número do vértice
-	int dist;
+	int dist; // peso da aresta
 	struct Node* prox; // próximo nó
 }NODE;
 
@@ -34,9 +34,10 @@ GRAFO* GrafoInit(int v) {
 /*
 * função que insere um novo nó a lista 
 */
-NODE* NEWnode(int v, NODE* prox) {
+NODE* NEWnode(int v, int d, NODE* prox) {
 	NODE* a = new NODE;
 	a->num = v;
+	a->dist = d;
 	a->prox = prox;
 	return a;
 }
@@ -44,10 +45,10 @@ NODE* NEWnode(int v, NODE* prox) {
 /*
 * Procedimento de inserção de arestas
 */
-void GrafoInsertLink(GRAFO* g, int v, int w) {
+void GrafoInsertLink(GRAFO* g, int v, int w, int d) {
 	for (NODE* a = g->n[v]; a != nullptr; a = a->prox)
 		if (a->num == v) return;
-	g->n[v] = NEWnode(w, g->n[v]);
+	g->n[v] = NEWnode(w, d, g->n[v]);
 	g->a++;
 }
 
@@ -86,7 +87,7 @@ void IsReachable(GRAFO *g, int idx1, int idx2) {
 		std::cout << "output: " << -1 << std::endl;
 	else {
 		std::cout << "output: " << d << std::endl;
-		GrafoInsertLink(g, idx1, idx2);
+		GrafoInsertLink(g, idx1, idx2, d);
 	}
 }
 
