@@ -4,20 +4,20 @@
 struct points { int x; int y; int r; };
 
 typedef struct Node {
-	int num; //n˙mero do vÈrtice
+	int num; //n√∫mero do v√©rtice
 	int dist; // peso da aresta
-	struct Node* prox; // prÛximo nÛ
+	struct Node* prox; // pr√≥ximo n√≥
 }NODE;
 
 typedef struct Grafo {
-	int v; // n˙mero de vertices do grafo
-	int a; // n˙mero de arcos do grafo
+	int v; // n√∫mero de vertices do grafo
+	int a; // n√∫mero de arcos do grafo
 	points* p;
 	NODE** n;   
 }GRAFO;
 
 /*
-* FunÁ„o de inicializaÁ„o do grafo, passando o n˙mero de vertices como par‚metro
+* Fun√ß√£o de inicializa√ß√£o do grafo, passando o n√∫mero de vertices como par√¢metro
 */
 GRAFO* GrafoInit(int v) {
 	GRAFO* g = new GRAFO;
@@ -32,7 +32,7 @@ GRAFO* GrafoInit(int v) {
 }
 
 /*
-* funÁ„o que insere um novo nÛ a lista 
+* fun√ß√£o que insere um novo n√≥ a lista 
 */
 NODE* NEWnode(int v, int d, NODE* prox) {
 	NODE* a = new NODE;
@@ -43,7 +43,7 @@ NODE* NEWnode(int v, int d, NODE* prox) {
 }
 
 /*
-* Procedimento que remove um nÛ da lista ligada;
+* Procedimento que remove um n√≥ da lista ligada;
 */
 void RemoveNode(GRAFO* g, int v, int w) {
 	NODE** rmv = &g->n[v];
@@ -59,7 +59,7 @@ void RemoveNode(GRAFO* g, int v, int w) {
 }
 
 /*
-* Procedimento de inserÁ„o de aresta
+* Procedimento de inser√ß√£o de aresta
 */
 void GrafoInsertLink(GRAFO* g, int v, int w, int d) {
 	for (NODE* a = g->n[v]; a != nullptr; a = a->prox)
@@ -69,7 +69,7 @@ void GrafoInsertLink(GRAFO* g, int v, int w, int d) {
 }
 
 /*
-* Procedimento de inserÁ„o de aresta bidirecionalmente
+* Procedimento de inser√ß√£o de aresta bidirecionalmente
 */
 void GrafoBiLink(GRAFO* g, int v, int w, int d) {
 	GrafoInsertLink(g, v, w, d);
@@ -77,7 +77,7 @@ void GrafoBiLink(GRAFO* g, int v, int w, int d) {
 }
 
 /*
-* Procedimento de remoÁ„o de aresta
+* Procedimento de remo√ß√£o de aresta
 */
 void GrafoRemoveLink(GRAFO* g, int v, int w) {
 	RemoveNode(g, v, w);
@@ -85,7 +85,7 @@ void GrafoRemoveLink(GRAFO* g, int v, int w) {
 }
 
 /*
-* Procedimento para desalocar o espaÁo de memÛria do grafo
+* Procedimento para desalocar o espa√ßo de mem√≥ria do grafo
 */
 void DestroyGrafo(GRAFO* g) {
 	NODE* aux;
@@ -133,6 +133,265 @@ void IsReachable(GRAFO *g, int idx1, int idx2) {
 	}
 }
 
+/*
+* Fun√ß√£o para auxiliar fun√ß√£o de circuitos
+*/
+static bool AuxCircuito( GRAFO* G, int v, int *pre, int *pa) { 
+   int cnt = 0;
+   pre[v] = cnt++;
+   for (NODE* a = G->n[v]; a != NULL; a = a->prox) {
+      int num = a->num;
+      if (pre[num] == -1) {
+         pa[num] = v; 
+         if (AuxCircuito( G, num, pre, pa)) return true;
+      } else { // pre[w] < pre[v]
+         if (num != pa[v]) return true; 
+      }
+   }
+   return false;
+}
+
+/*
+* Fun√ß√£o de Circuitos
+*/
+bool All_Circuito( GRAFO* G) {
+   int *pre = (int *) malloc( G->v * sizeof (int));
+   int *pa = (int *) malloc( G->v * sizeof (int));
+   int cnt = 0;
+   for (int x = 0; x < G->v; ++x)
+      pre[x] = -1;
+   for (int x = 0; x < G->v; ++x) {
+      if (pre[x] == -1) {
+         pa[x] = x;
+         if (AuxCircuito( G, x, pre, pa)) {
+            free( pre); free( pa);
+            return true;
+         }
+      }
+   }
+   free( pre); free( pa);
+   return false;
+}
+/*
+* Fun√ß√£o Auxiliar de DFS
+*/
+static void AuxDFS( GRAFO* G, int v, int *pre, int *post, int *pa) { 
+   int cnt = 0;
+   int cntt = 0;
+   pre[v] = cnt++; 
+   for (NODE* a = G->n[v]; a != NULL; a = a->prox)
+      if (pre[a->num] == -1) {
+         pa[a->num] = v; 
+         DFS( G, a->num, pre, post, pa); 
+      } 
+   post[v] = cntt++;
+}
+
+/*
+* Fun√ß√£o DFS (Depth-first search)
+*/
+
+void DFS( GRAFO* G, int *pre, int *post, int *pa) { 
+   int cnt = 0;
+   int cntt = 0; 
+   for (int x = 0; x < G->v; ++x) 
+      pre[x] = post[x] = -1; // A
+   for (int x = 0; x < G->v; ++x)
+      if (pre[x] == -1) {
+         pa[x] = x;
+         DFS( G, x, pre, post, pa); // nova etapa
+      }
+}
+
+/*
+* Fun√ß√£o BFS (Breadth-first search)
+*/
+
+static void GrafoBFS( GRAFO* G, int s, int num[], int pa[]) { 
+   for (int x = 0; x < G->v; ++x) 
+      num[x] = -1;
+   int c = 0;
+   num[s] = c++;
+   pa[s] = s;
+   QUEUEinit( G->v);
+   QUEUEput( s); 
+   while (!QUEUEempty( )) {
+      int x = QUEUEget( ); 
+      for (NODE* a = G->n[x]; a != NULL; a = a->prox)
+         if (num[a->num] == -1) {
+            num[a->num] = c++; 
+            pa[a->num] = x;
+            QUEUEput( a->num); 
+         }
+   }
+   QUEUEfree( ); 
+}
+
+/*
+* Fun√ß√£o de Dijkstra
+*/
+
+void Dijkstra( GRAFO* G, int s, int *pa, int *dist) { 
+   for (int x = 0; x < G->v; ++x) 
+      pa[x] = -1, dist[x] = INT_MAX;
+   pa[s] = s, dist[s] = 0; 
+   while (true) {
+      int minc = INT_MAX;
+      int z = 0; 
+      int y = 0;
+      for (int x = 0; x < G->v; ++x) {
+         if (pa[x] == -1) continue;
+         for (NODE* a = G->n[x]; a != NULL; a = a->prox) {
+            if (pa[a->num] != -1) continue;
+            if (dist[x] + a->dist < minc) {
+               minc = dist[x] + a->dist;
+               z = x, y = a->num;
+            }
+         }
+      }
+      if (minc == INT_MAX) break; 
+      pa[y] = z, dist[y] = minc;
+   }
+}
+
+/*
+* Fun√ß√£o de Bellman-Ford
+*/
+
+int BellmanFord( GRAFO* G, int s, int *pa, int *dist) { 
+   QUEUEinit( G->a);
+   bool *onqueue = (bool *) malloc( G->v * sizeof (bool));
+   for (int u = 0; u < G->v; ++u)
+      pa[u] = -1, dist[u] = INT_MAX, onqueue[u] = false;
+   pa[s] = s, dist[s] = 0;
+   QUEUEput( s);
+   onqueue[s] = true;
+   int j = G->v; 
+   QUEUEput( j); // sentinela
+   int k = 0;
+   while (true) {
+      int z = QUEUEget( );
+      if (z < j) {
+         for (NODE* a = G->n[z]; a != NULL; a = a->prox) {
+            if (dist[z] + a->dist < dist[a->num]) {
+               dist[a->num] = dist[z] + a->dist; 
+               pa[a->num] = z;
+               if (onqueue[a->num] == false) {
+                  QUEUEput( a->num);
+                  onqueue[a->num] = true;
+               }
+            }
+         }
+      } else { 
+         if (QUEUEempty( )) {
+            QUEUEfree( );
+            free( onqueue);
+            return -1; 
+         }
+         if (++k >= G->v) break;  
+         QUEUEput( j); // sentinela na fila
+         for (int u = 0; u < G->v; ++u) onqueue[u] = false;
+      }
+   }
+   free( onqueue);
+   // procura ciclo negativo:
+   while (true) {
+      int z = QUEUEget( ); 
+      for (NODE* a = G->n[z]; a != NULL; a = a->prox) {
+         if (dist[z] + a->dist < dist[a->num]) { 
+            QUEUEfree( );
+            bool *visited = (bool *) malloc( G->v * sizeof (bool));
+            for (int u = 0; u < G->v; ++u) visited[u] = false;
+            while (!visited[z]) {
+               visited[z] = true;
+               z = pa[z];
+            } 
+            free( visited);
+            return z;
+         }
+      }
+   }
+}
+
+/*
+* Fun√ß√£o de Prim
+*/
+
+int Prim( GRAFO* G, int pa[]) { 
+   for (int w = 0; w < G->v; ++w) pa[w] = -1; 
+   int s = 0;
+   pa[s] = s; 
+   int mstcost = 0;
+   while (true) {
+      int minc = INT_MAX;
+      int x = 0, y = 0;
+      for (int k = 0; k < G->v; ++k) {
+         if (pa[k] == -1) continue; 
+         for (NODE* a = G->n[k]; a != NULL; a = a->prox) 
+            if (pa[a->num] == -1 && a->dist < minc) {
+               minc = a->dist;
+               x = k, y = a->num;
+            }
+      }   
+      if (minc == INT_MAX) break; 
+      pa[y] = x;
+      mstcost += minc;
+   }
+   return mstcost;
+}
+
+/*
+* Cria√ß√£o de um v√©rtice auxiliar para Kruskal
+*/
+
+typedef struct { 
+    int v; 
+    int w; 
+    int c; 
+} edge;
+static edge EDGE( int v, int w, int c) {
+   edge e;
+   e.v = v, e.w = w; e.c = c;
+   return e;
+}
+
+/*
+* Fun√ß√£o de Kruskal
+*/
+
+
+int Kruskal( GRAFO* G, edge mst[]) { 
+   int *chefe =(int *) malloc(G->v * sizeof (int));
+   for (int x = 0; x < G->v; ++x) 
+      chefe[x] = x;
+   int k = 0;
+   int mstcost = 0;
+   while (true) {
+      // a floresta tem arestas mst[0..k-1]
+      int minc = INT_MAX;
+     int x; 
+     int y;
+      for (int j = 0; j < G->v; ++j) {
+         for (NODE* a = G->n[j]; a != NULL; a = a->prox) {
+            int num = a->num; int dist = a->dist;
+            if (j < num && chefe[j] != chefe[num] && dist < minc) {
+               minc = dist;
+               x = j, y = num;
+            }
+         }
+      }
+      if (minc == INT_MAX) return mstcost;
+      edge e; e.v = x, e.w = y, e.c = minc; 
+      mstcost += e.c;
+      mst[k++] = e;
+      int v0 = chefe[x], w0 = chefe[y];
+      for (int n = 0; n < G->v; ++n)
+         if (chefe[n] == w0)
+            chefe[n] = v0;
+   }
+   free( chefe);
+}
+
 int main(int argc, char **argv) {
 	int n, c, idx1, idx2;
 	int x, y, r;
@@ -149,7 +408,7 @@ int main(int argc, char **argv) {
 			g->p[i].y = y;
 			g->p[i].r = r;
 		}
-		//loop para verificar a menor dist‚ncia entre as antenas; 
+		//loop para verificar a menor dist√¢ncia entre as antenas; 
 		std::cin >> c;
 		for (int i = 0; i < c; i++) {
 			std::cin >> idx1 >> idx2;
